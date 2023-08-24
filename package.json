@@ -1,0 +1,13 @@
+{
+  "name": "com.urbanfox.core",
+  "version": "2023.8.0",
+  "displayName": "UrbanFox Core",
+  "description": "My cool tools.",
+  "unity": "2019.1",
+  "unityRelease": "0b5",
+  "author": {
+    "name": "Chi",
+    "email": "huchi.hello@gmail.com",
+    "url": "https://huchi57.com"
+  }
+}
