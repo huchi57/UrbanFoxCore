@@ -1,49 +1,16 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
-using UnityEngine.Networking;
+using System.IO;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System.IO;
+using UnityEngine;
+using UnityEditor;
+using UnityEngine.Networking;
 
 namespace UrbanFox.Editor
 {
     public class LocalizationBrowser : EditorWindow
     {
-        //[SerializeField] private string m_fullURL = string.Empty;
-        //[SerializeField] private string m_searchText = string.Empty;
-
-        //[MenuItem("OwO/Window/Localization Browser...")]
-        //private static void Init()
-        //{
-        //    var window = GetWindow<LocalizationBrowser>();
-        //    window.titleContent = new GUIContent("Localization");
-        //    window.Show();
-        //}
-
-        //private void OnGUI()
-        //{
-        //    GUILayout.Label("Spreadsheet Settings", EditorStyles.boldLabel);
-        //    GUILayout.BeginHorizontal();
-        //    if (GUILayoutExtensions.ColoredButton("View Spreadsheet in Online Browser...", Color.yellow, GUILayout.Height(40)))
-        //    {
-        //    }
-        //    if (GUILayoutExtensions.ColoredButton("Update Latest from Online Spreadsheet...", Color.yellow, GUILayout.Height(40)))
-        //    {
-        //    }
-        //    GUILayout.EndHorizontal();
-        //    GUILayoutExtensions.HorizontalLine();
-
-        //    GUILayout.Label("Languages", EditorStyles.boldLabel);
-        //    GUILayout.BeginHorizontal();
-        //    GUILayout.EndHorizontal();
-        //    GUILayoutExtensions.HorizontalLine();
-
-        //    m_searchText = EditorGUILayoutExtensions.SearchText("Keyword", m_searchText);
-        //    GUILayoutExtensions.HorizontalLine();
-        //}
         private const string _sourceSpreadsheetIDKey = "UrbanFox.Editor.LocalizationBrowser.SpreadsheetSourceKey.";
         private const string _assetCreationFolder = "Assets/Resources/" + Localization.LanguageXMLAssetResourceFolder;
 
