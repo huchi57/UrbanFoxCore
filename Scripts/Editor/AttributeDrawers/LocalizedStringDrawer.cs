@@ -105,9 +105,10 @@ namespace UrbanFox.Editor
             var preview = new StringBuilder();
             if (Localization.IsInitialized && Localization.NumberOfLanguages > 0)
             {
-                for (int i = 0; i < Localization.NumberOfLanguages; i++)
+                preview.Append($"{Localization.GetLanguageCodeNameByLanguageIndex(0)}: {key.GetLocalizationOverride(0)}");
+                for (int i = 1; i < Localization.NumberOfLanguages; i++)
                 {
-                    preview.AppendLine($"{Localization.GetLanguageCodeNameByLanguageIndex(i)}: {key.GetLocalizationOverride(i)}");
+                    preview.Append($"\n{Localization.GetLanguageCodeNameByLanguageIndex(i)}: {key.GetLocalizationOverride(i)}");
                 }
             }
             return preview.ToString();
