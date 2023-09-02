@@ -103,9 +103,9 @@ namespace UrbanFox.Editor
         private string GetKeyPreviews(string key)
         {
             var preview = new StringBuilder();
-            if (Localization.IsInitialized && Localization.Keys.Count > 0)
+            if (Localization.IsInitialized && Localization.NumberOfLanguages > 0)
             {
-                for (int i = 0; i < Localization.Keys.Count; i++)
+                for (int i = 0; i < Localization.NumberOfLanguages; i++)
                 {
                     preview.AppendLine($"{Localization.GetLanguageCodeNameByLanguageIndex(i)}: {key.GetLocalizationOverride(i)}");
                 }
