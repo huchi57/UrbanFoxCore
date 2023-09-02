@@ -9,10 +9,11 @@ namespace UrbanFox.Editor
     {
         private const int m_gap = 2;
         private const int m_searchIconWidth = 20;
-        private const int m_localizationBrowserRectHeight = 100;
+        private const int m_localizationBrowserRectHeight = 200;
 
         [SerializeField] private bool m_isExpanded;
 
+        private int m_numberOfKeysMatch = 0;
         private Vector2 m_scrollView;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -48,19 +49,26 @@ namespace UrbanFox.Editor
 
                 // Draw browser scroll view
                 var positionRect = new Rect(position.x, position.yMax + m_gap, position.width, m_localizationBrowserRectHeight);
-                var viewRect = new Rect(0, 0, position.width, Localization.Keys.Count * EditorGUIUtility.singleLineHeight);
+                var viewRect = new Rect(0, 0, position.width, m_numberOfKeysMatch * EditorGUIUtility.singleLineHeight);
                 m_scrollView = GUI.BeginScrollView(positionRect, m_scrollView, viewRect);
                 var keyRect = new Rect(0, 0, position.width, EditorGUIUtility.singleLineHeight);
+
+                var currentKeyLowered = property.stringValue.ToLower();
+                m_numberOfKeysMatch = 0;
                 for (int i = 0; i < Localization.Keys.Count; i++)
                 {
                     var key = Localization.Keys[i];
-                    if (GUI.Button(keyRect, new GUIContent(key, GetKeyPreviews(key))))
+                    if (key.ToLower().Contains(currentKeyLowered))
                     {
-                        property.stringValue = key;
-                        m_isExpanded = false;
-                        GUI.FocusControl(null);
+                        if (GUI.Button(keyRect, new GUIContent(key, GetKeyPreviews(key))))
+                        {
+                            property.stringValue = key;
+                            m_isExpanded = false;
+                            GUI.FocusControl(null);
+                        }
+                        keyRect.y += EditorGUIUtility.singleLineHeight;
+                        m_numberOfKeysMatch++;
                     }
-                    keyRect.y += EditorGUIUtility.singleLineHeight;
                 }
                 GUI.EndScrollView();
             }
