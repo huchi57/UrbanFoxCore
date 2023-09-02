@@ -8,33 +8,36 @@ namespace UrbanFox
         private static bool m_isApplicationQuitting = false;
 
         public static bool IsInstanceExist => !m_isApplicationQuitting && m_instance != null;
+        public static T Instance => GetInstance();
 
-        public static T Instance
+        public static T GetInstance()
         {
-            get
+            if (m_isApplicationQuitting)
             {
-                if (m_isApplicationQuitting)
-                {
-                    FoxyLogger.LogWarning($"An instance of {typeof(T)} will not be returned because the application is quitting.");
-                    return null;
-                }
+                FoxyLogger.LogWarning($"An instance of {typeof(T)} will not be returned because the application is quitting.");
+                return null;
+            }
+            if (m_instance == null)
+            {
+                m_instance = FindObjectOfType<T>();
                 if (m_instance == null)
                 {
-                    m_instance = FindObjectOfType<T>();
-                    if (m_instance == null)
-                    {
-                        m_instance = new GameObject($"[{typeof(T).Name}]").AddComponent<T>();
-                        FoxyLogger.Log($"An instance of {typeof(T)} has been automatically created because an instance could not be found.");
-                    }
-                    DontDestroyOnLoad(m_instance.transform.root);
+                    m_instance = new GameObject($"[{typeof(T).Name}]").AddComponent<T>();
+                    FoxyLogger.Log($"An instance of {typeof(T)} has been automatically created because an instance could not be found.");
                 }
-                return m_instance;
+                DontDestroyOnLoad(m_instance.transform.root);
             }
+            return m_instance;
+        }
+
+        public virtual void OnAwake()
+        {
+            GetInstance();
         }
 
         public virtual void OnApplicationQuit()
         {
-            m_isApplicationQuitting = true;
+            m_isApplicationQuitting = false;
         }
     }
 }
