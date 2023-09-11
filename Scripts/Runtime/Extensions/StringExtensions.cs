@@ -34,6 +34,19 @@ namespace UrbanFox
             return $"<color=#{ColorUtility.ToHtmlStringRGBA(color)}>{text}</color>";
         }
 
+        public static string Capitalize(this string text)
+        {
+            if (text.IsNullOrEmpty())
+            {
+                return text;
+            }
+            if (text.Length <= 1)
+            {
+                return text.ToUpper();
+            }
+            return text[0].ToString().ToUpper() + text.Substring(1);
+        }
+
         public static string ToXMLAttribute(this string text)
         {
             return text.Replace("&", "&amp;")
