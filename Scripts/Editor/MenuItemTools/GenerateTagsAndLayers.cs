@@ -4,7 +4,6 @@ using System.Text;
 using UnityEditor;
 using UnityEditorInternal;
 
-#pragma warning disable CS0162
 namespace UrbanFox.Editor
 {
     public class GenerateTagsAndLayers
@@ -39,17 +38,13 @@ namespace UrbanFox.Editor
             }
             content.AppendLine("}");
 
-            if (m_dryTest)
-            {
-                FoxyLogger.Log(content.ToString());
-            }
-
             if (!Directory.Exists(m_scriptCreationFolder))
             {
                 Directory.CreateDirectory(m_scriptCreationFolder);
             }
             var fileLocation = Path.Combine(m_scriptCreationFolder, $"Tags{(m_dryTest ? ".txt" : ".cs")}");
             File.WriteAllText(fileLocation, content.ToString());
+            FoxyLogger.Log($"File {fileLocation} has been auto-generated.");
             AssetDatabase.Refresh();
         }
 
@@ -94,4 +89,3 @@ namespace UrbanFox.Editor
         //}
     }
 }
-#pragma warning restore CS0162
