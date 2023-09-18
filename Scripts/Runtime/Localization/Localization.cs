@@ -12,6 +12,7 @@ namespace UrbanFox
 
         private static Dictionary<string, string>[] _fullLocalizationData = null;
         private static readonly List<string> _missingKeys = new List<string>();
+        private static event Action _onLanguageChanged;
 
         public static Dictionary<string, string> CurrentLanguageData => CurrentLanguageIndex.IsInRange(_fullLocalizationData) ? _fullLocalizationData[CurrentLanguageIndex] : null;
         public static int NumberOfLanguages => _fullLocalizationData.IsNullOrEmpty() ? 0 : _fullLocalizationData.Count();
@@ -19,6 +20,19 @@ namespace UrbanFox
         public static int CurrentLanguageIndex { get; private set; }
         public static string LanguageKeyName { get; private set; }
         public static bool IsInitialized { get; private set; }
+
+        public static event Action OnLanguageChanged
+        {
+            add
+            {
+                _onLanguageChanged += value;
+                value?.Invoke();
+            }
+            remove
+            {
+                _onLanguageChanged -= value;
+            }
+        }
 
         static Localization()
         {
@@ -103,6 +117,7 @@ namespace UrbanFox
             if (languageIndex.IsInRange(_fullLocalizationData))
             {
                 CurrentLanguageIndex = languageIndex;
+                _onLanguageChanged?.Invoke();
             }
         }
 
@@ -230,6 +245,7 @@ namespace UrbanFox
             }
 
             IsInitialized = true;
+            _onLanguageChanged?.Invoke();
         }
     }
 }
