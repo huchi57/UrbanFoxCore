@@ -4,7 +4,7 @@ namespace UrbanFox
 {
     public static class MathExtensions
     {
-        private const float _neglectableValue = 0.00001f;
+        private const float m_neglectableValue = 0.00001f;
 
         public static bool IsInRange(this int value, int rangeStart, int rangeEnd, bool minInclusive = true, bool maxInclusive = true)
         {
@@ -100,7 +100,7 @@ namespace UrbanFox
 
         public static bool IsApproximately(this float value1, float value2)
         {
-            return Mathf.Abs(value2 - value1) < Mathf.Max(_neglectableValue * Mathf.Max(Mathf.Abs(value1), Mathf.Abs(value2)), 8 * float.Epsilon);
+            return Mathf.Abs(value2 - value1) < Mathf.Max(m_neglectableValue * Mathf.Max(Mathf.Abs(value1), Mathf.Abs(value2)), 8 * float.Epsilon);
         }
 
         public static bool IsApproximatelyZero(this float value)

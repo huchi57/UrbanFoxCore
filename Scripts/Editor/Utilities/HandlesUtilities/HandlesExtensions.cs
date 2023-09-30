@@ -3,7 +3,7 @@ using UnityEditor;
 
 namespace UrbanFox.Editor
 {
-    public static class HandlesExtensions
+    public static partial class HandlesExtensions
     {
         public static void DrawPolyLine(Color color, params Vector3[] points)
         {
