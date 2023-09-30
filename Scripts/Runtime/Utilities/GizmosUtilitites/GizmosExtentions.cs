@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace UrbanFox
 {
-    public static class GizmosExtentions
+    public static partial class GizmosExtentions
     {
         public static void DrawLine(Vector3 from, Vector3 to, Color color)
         {
