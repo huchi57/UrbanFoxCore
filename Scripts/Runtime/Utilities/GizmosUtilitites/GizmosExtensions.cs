@@ -12,6 +12,20 @@ namespace UrbanFox
             }
         }
 
+        public static void DrawLines(Color color, params Vector3[] points)
+        {
+            if (points != null && points.Length > 0)
+            {
+                using (new GizmosScope(color))
+                {
+                    for (int i = 0; i < points.Length - 1; i++)
+                    {
+                        Gizmos.DrawLine(points[i], points[i + 1]);
+                    }
+                }
+            }
+        }
+
         public static void DrawWireSphere(Vector3 center, float radius, Color color)
         {
             using (new GizmosScope(color))
