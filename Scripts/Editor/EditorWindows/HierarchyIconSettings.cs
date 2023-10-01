@@ -246,10 +246,18 @@ namespace UrbanFox.Editor
                 {
                     if (gameObject.TryGetComponent(type, out var component))
                     {
+                        // Add the new type to dictionary if a key does not exist
                         if (!m_typesAndIcon.ContainsKey(type))
                         {
                             m_typesAndIcon.Add(type, GetComponentIcon(component));
                         }
+
+                        // Re-fetch component icon if a key is found but the corresponding texture is lost
+                        else if (m_typesAndIcon[type] == null)
+                        {
+                            m_typesAndIcon[type] = GetComponentIcon(component);
+                        }
+
                         var iconRect = new Rect(selectionRect)
                         {
                             xMin = selectionRect.xMax - IconSize * iconCount,
