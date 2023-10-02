@@ -253,8 +253,7 @@ namespace UrbanFox.Editor
                 int iconCount = 1;
                 foreach (var typeFullName in m_data.DrawIconTypesWithFullName)
                 {
-                    var type = Type.GetType(typeFullName);
-                    type = AllComponentTypes.Where(t => t.FullName == typeFullName).FirstOrDefault();
+                    var type = AllComponentTypes.Where(t => t.FullName == typeFullName).FirstOrDefault();
                     if (type != null && gameObject.TryGetComponent(type, out var component))
                     {
                         // Add the new type to dictionary if a key does not exist
