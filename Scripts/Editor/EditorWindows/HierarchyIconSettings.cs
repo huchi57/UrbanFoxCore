@@ -44,6 +44,7 @@ namespace UrbanFox.Editor
 
         private void OnDisable()
         {
+            DrawIconInHierarchy.SaveSettings();
             EditorPrefs.SetString(EditorPrefsKey, JsonUtility.ToJson(m_editorData));
         }
 
@@ -115,18 +116,27 @@ namespace UrbanFox.Editor
     [InitializeOnLoad]
     public static class DrawIconInHierarchy
     {
+        [Serializable]
+        public struct Data
+        {
+            public List<string> DrawIconTypesWithFullName;
+        }
+
         public const int IconSize = 16;
         public static readonly List<Type> AllComponentTypes = new List<Type>();
 
-        private static readonly Dictionary<Type, Texture2D> m_typesAndIcon = new Dictionary<Type, Texture2D>();
-        private static readonly List<Type> m_drawIconTypes;
+        private static readonly Dictionary<string, Texture2D> m_typeFullNamesAndIcon = new Dictionary<string, Texture2D>();
+        private static Data m_data;
 
-        private static string EditorPrefsKey => $"{Application.companyName}/{Application.productName}/{nameof(m_drawIconTypes)}";
+        private static string EditorPrefsKey => $"{Application.companyName}/{Application.productName}/{nameof(m_data)}";
 
         static DrawIconInHierarchy()
         {
             EditorApplication.hierarchyWindowItemOnGUI += DrawIconOnWindowItem;
-            m_drawIconTypes = EditorPrefs.HasKey(EditorPrefsKey) ? JsonUtility.FromJson<List<Type>>(EditorPrefs.GetString(EditorPrefsKey)) : new List<Type>();
+            m_data = EditorPrefs.HasKey(EditorPrefsKey) ? JsonUtility.FromJson<Data>(EditorPrefs.GetString(EditorPrefsKey)) : new Data()
+            {
+                DrawIconTypesWithFullName = new List<string>()
+            };
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 var newTypes = assembly.GetTypes().Where(type => type.IsClass
@@ -140,32 +150,37 @@ namespace UrbanFox.Editor
 
         public static bool IsTypeDrawnInHierarchy(Type type)
         {
-            return m_drawIconTypes.Contains(type);
+            return m_data.DrawIconTypesWithFullName.Contains(type.FullName);
         }
 
         public static void AddType(Type type)
         {
-            if (!m_drawIconTypes.Contains(type))
+            if (!m_data.DrawIconTypesWithFullName.Contains(type.FullName))
             {
-                m_drawIconTypes.Add(type);
+                m_data.DrawIconTypesWithFullName.Add(type.FullName);
                 SaveSettings();
             }
         }
 
         public static void RemoveType(Type type)
         {
-            if (m_drawIconTypes.Contains(type))
+            if (m_data.DrawIconTypesWithFullName.Contains(type.FullName))
             {
-                m_drawIconTypes.Remove(type);
+                m_data.DrawIconTypesWithFullName.Remove(type.FullName);
                 SaveSettings();
             }
         }
 
+        public static void SaveSettings()
+        {
+            EditorPrefs.SetString(EditorPrefsKey, JsonUtility.ToJson(m_data));
+        }
+
         public static Texture2D GetComponentIcon(Type type)
         {
-            if (m_typesAndIcon.ContainsKey(type))
+            if (m_typeFullNamesAndIcon.ContainsKey(type.FullName))
             {
-                return m_typesAndIcon[type];
+                return m_typeFullNamesAndIcon[type.FullName];
             }
             return null;
         }
@@ -207,11 +222,11 @@ namespace UrbanFox.Editor
                 return;
             }
 
-            // TODO: Not a very good way because it assumes the type matches the name of the script, and it cannot find built-in types as well
+            // TODO: It works now, but it is not a very good way because it assumes the type matches the name of the script, and it cannot find built-in types as well
             foreach (var type in types)
             {
                 // Ignore duplicates
-                if (!m_typesAndIcon.ContainsKey(type))
+                if (!m_typeFullNamesAndIcon.ContainsKey(type.FullName))
                 {
                     var scriptGUID = AssetDatabase.FindAssets(type.Name).FirstOrDefault();
 
@@ -223,7 +238,7 @@ namespace UrbanFox.Editor
                         // In case the importer cannot be cast into a MonoImporter
                         if (scriptImporter is MonoImporter monoImporter)
                         {
-                            m_typesAndIcon.Add(type, monoImporter.GetIcon());
+                            m_typeFullNamesAndIcon.Add(type.FullName, monoImporter.GetIcon());
                         }
                     }
                 }
@@ -233,23 +248,24 @@ namespace UrbanFox.Editor
         private static void DrawIconOnWindowItem(int instanceID, Rect selectionRect)
         {
             var gameObject = (GameObject)EditorUtility.InstanceIDToObject(instanceID);
-            if (gameObject && !m_drawIconTypes.IsNullOrEmpty())
+            if (gameObject && !m_data.DrawIconTypesWithFullName.IsNullOrEmpty())
             {
                 int iconCount = 1;
-                foreach (var type in m_drawIconTypes)
+                foreach (var typeFullName in m_data.DrawIconTypesWithFullName)
                 {
-                    if (gameObject.TryGetComponent(type, out var component))
+                    var type = Type.GetType(typeFullName);
+                    if (type != null && gameObject.TryGetComponent(type, out var component))
                     {
                         // Add the new type to dictionary if a key does not exist
-                        if (!m_typesAndIcon.ContainsKey(type))
+                        if (!m_typeFullNamesAndIcon.ContainsKey(typeFullName))
                         {
-                            m_typesAndIcon.Add(type, GetComponentIcon(component));
+                            m_typeFullNamesAndIcon.Add(typeFullName, GetComponentIcon(component));
                         }
 
                         // Re-fetch component icon if a key is found but the corresponding texture is lost
-                        else if (m_typesAndIcon[type] == null)
+                        else if (m_typeFullNamesAndIcon[typeFullName] == null)
                         {
-                            m_typesAndIcon[type] = GetComponentIcon(component);
+                            m_typeFullNamesAndIcon[typeFullName] = GetComponentIcon(component);
                         }
 
                         var iconRect = new Rect(selectionRect)
@@ -257,16 +273,11 @@ namespace UrbanFox.Editor
                             xMin = selectionRect.xMax - IconSize * iconCount,
                             height = IconSize
                         };
-                        GUI.Label(iconRect, m_typesAndIcon[type]);
+                        GUI.Label(iconRect, m_typeFullNamesAndIcon[typeFullName]);
                         iconCount++;
                     }
                 }
             }
-        }
-
-        private static void SaveSettings()
-        {
-            EditorPrefs.SetString(EditorPrefsKey, JsonUtility.ToJson(m_drawIconTypes));
         }
     }
 }
