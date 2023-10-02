@@ -17,7 +17,6 @@ namespace UrbanFox.Editor
         }
 
         private const int m_rightColumnWidth = 60;
-        private readonly List<Type> m_allComponentTypes = new List<Type>();
 
         private EditorData m_editorData;
         private Vector2 m_scroll;
@@ -42,16 +41,6 @@ namespace UrbanFox.Editor
                 TypesWithIconOnly = true,
                 EnalbedTypesOnly = false
             };
-            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var assembly in allAssemblies)
-            {
-                var newTypes = assembly.GetTypes().Where(type => type.IsClass
-                    && type.IsSubclassOf(typeof(Component))
-                    && !type.IsAbstract
-                    && !type.IsGenericType);
-                m_allComponentTypes.AddRange(newTypes);
-            }
-            DrawIconInHierarchy.TryFindIconsFromType(m_allComponentTypes);
         }
 
         private void OnDisable()
@@ -61,7 +50,7 @@ namespace UrbanFox.Editor
 
         private void OnGUI()
         {
-            if (m_allComponentTypes.IsNullOrEmpty())
+            if (DrawIconInHierarchy.AllComponentTypes.IsNullOrEmpty())
             {
                 return;
             }
@@ -89,7 +78,7 @@ namespace UrbanFox.Editor
             m_numberOfFoundTypes = 0;
             m_scroll = GUILayout.BeginScrollView(m_scroll);
             var cachedSearchText = m_editorData.SearchText.ToLower();
-            foreach (var type in m_allComponentTypes)
+            foreach (var type in DrawIconInHierarchy.AllComponentTypes)
             {
                 if (type.Name.ToLower().Contains(cachedSearchText))
                 {
@@ -132,6 +121,7 @@ namespace UrbanFox.Editor
     public static class DrawIconInHierarchy
     {
         public const int IconSize = 16;
+        public static readonly List<Type> AllComponentTypes = new List<Type>();
 
         private static readonly Dictionary<Type, Texture2D> m_typesAndIcon = new Dictionary<Type, Texture2D>();
         private static readonly List<Type> m_drawIconTypes;
@@ -142,36 +132,15 @@ namespace UrbanFox.Editor
         {
             EditorApplication.hierarchyWindowItemOnGUI += DrawIconOnWindowItem;
             m_drawIconTypes = EditorPrefs.HasKey(EditorPrefsKey) ? JsonUtility.FromJson<List<Type>>(EditorPrefs.GetString(EditorPrefsKey)) : new List<Type>();
-        }
-
-        public static void TryFindIconsFromType(List<Type> types)
-        {
-            if (types.IsNullOrEmpty())
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                return;
+                var newTypes = assembly.GetTypes().Where(type => type.IsClass
+                    && type.IsSubclassOf(typeof(Component))
+                    && !type.IsAbstract
+                    && !type.IsGenericType);
+                AllComponentTypes.AddRange(newTypes);
             }
-
-            // TODO: Not a very good way because it assumes the type matches the name of the script, and it cannot find built-in types as well
-            foreach (var type in types)
-            {
-                // Ignore duplicates
-                if (!m_typesAndIcon.ContainsKey(type))
-                {
-                    var scriptGUID = AssetDatabase.FindAssets(type.Name).FirstOrDefault();
-
-                    // In case a GUID cannot be found
-                    if (!string.IsNullOrEmpty(scriptGUID))
-                    {
-                        var scriptImporter = AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(scriptGUID));
-
-                        // In case the importer cannot be cast into a MonoImporter
-                        if (scriptImporter is MonoImporter monoImporter)
-                        {
-                            m_typesAndIcon.Add(type, monoImporter.GetIcon());
-                        }
-                    }
-                }
-            }
+            TryFindIconsFromType(AllComponentTypes);
         }
 
         public static bool IsTypeDrawnInHierarchy(Type type)
@@ -234,6 +203,36 @@ namespace UrbanFox.Editor
             }
 
             return null;
+        }
+
+        private static void TryFindIconsFromType(List<Type> types)
+        {
+            if (types.IsNullOrEmpty())
+            {
+                return;
+            }
+
+            // TODO: Not a very good way because it assumes the type matches the name of the script, and it cannot find built-in types as well
+            foreach (var type in types)
+            {
+                // Ignore duplicates
+                if (!m_typesAndIcon.ContainsKey(type))
+                {
+                    var scriptGUID = AssetDatabase.FindAssets(type.Name).FirstOrDefault();
+
+                    // In case a GUID cannot be found
+                    if (!string.IsNullOrEmpty(scriptGUID))
+                    {
+                        var scriptImporter = AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(scriptGUID));
+
+                        // In case the importer cannot be cast into a MonoImporter
+                        if (scriptImporter is MonoImporter monoImporter)
+                        {
+                            m_typesAndIcon.Add(type, monoImporter.GetIcon());
+                        }
+                    }
+                }
+            }
         }
 
         private static void DrawIconOnWindowItem(int instanceID, Rect selectionRect)
