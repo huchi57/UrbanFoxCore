@@ -12,8 +12,7 @@ namespace UrbanFox.Editor
         public struct EditorData
         {
             public string SearchText;
-            public bool TypesWithIconOnly;
-            public bool EnalbedTypesOnly;
+            public bool ShowEnabledTypesOnly;
         }
 
         private const int m_rightColumnWidth = 60;
@@ -30,6 +29,7 @@ namespace UrbanFox.Editor
         {
             var window = GetWindow<HierarchyIconSettings>();
             window.titleContent = new GUIContent("Hierarchy Icon Settings");
+            window.minSize = new Vector2(275, 200);
             window.Show();
         }
 
@@ -38,8 +38,7 @@ namespace UrbanFox.Editor
             m_editorData = EditorPrefs.HasKey(EditorPrefsKey) ? JsonUtility.FromJson<EditorData>(EditorPrefs.GetString(EditorPrefsKey)) : new EditorData()
             {
                 SearchText = string.Empty,
-                TypesWithIconOnly = true,
-                EnalbedTypesOnly = false
+                ShowEnabledTypesOnly = false
             };
         }
 
@@ -64,8 +63,7 @@ namespace UrbanFox.Editor
             }
 
             m_editorData.SearchText = EditorGUILayoutExtensions.SearchText("Search", m_editorData.SearchText);
-            m_editorData.TypesWithIconOnly = EditorGUILayout.Toggle("Types With Icon Only", m_editorData.TypesWithIconOnly);
-            m_editorData.EnalbedTypesOnly = EditorGUILayout.Toggle("Enabled Types Only", m_editorData.EnalbedTypesOnly);
+            m_editorData.ShowEnabledTypesOnly = EditorGUILayout.Toggle("Show Enabled Types Only", m_editorData.ShowEnabledTypesOnly);
             EditorGUILayout.HelpBox("Script icons of the enable types below will be drawn in the Hierarchy.", MessageType.Info);
             EditorGUILayout.Space();
 
@@ -80,32 +78,29 @@ namespace UrbanFox.Editor
             var cachedSearchText = m_editorData.SearchText.ToLower();
             foreach (var type in DrawIconInHierarchy.AllComponentTypes)
             {
-                if (type.Name.ToLower().Contains(cachedSearchText))
+                if (type.Name.ToLower().Contains(cachedSearchText) && DrawIconInHierarchy.GetComponentIcon(type) != null)
                 {
-                    if (!m_editorData.TypesWithIconOnly || DrawIconInHierarchy.GetComponentIcon(type) != null)
+                    if (!m_editorData.ShowEnabledTypesOnly || DrawIconInHierarchy.IsTypeDrawnInHierarchy(type))
                     {
-                        if (!m_editorData.EnalbedTypesOnly || DrawIconInHierarchy.IsTypeDrawnInHierarchy(type))
+                        m_numberOfFoundTypes++;
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Label(DrawIconInHierarchy.GetComponentIcon(type), GUILayout.Width(DrawIconInHierarchy.IconSize), GUILayout.Height(EditorGUIUtility.singleLineHeight));
+                        GUILayout.Label(new GUIContent(type.Name, type.FullName), GUILayout.Width(position.width - DrawIconInHierarchy.IconSize - m_rightColumnWidth - 20));
+                        if (DrawIconInHierarchy.IsTypeDrawnInHierarchy(type))
                         {
-                            m_numberOfFoundTypes++;
-                            GUILayout.BeginHorizontal();
-                            GUILayout.Label(DrawIconInHierarchy.GetComponentIcon(type), GUILayout.Width(DrawIconInHierarchy.IconSize), GUILayout.Height(EditorGUIUtility.singleLineHeight));
-                            GUILayout.Label(new GUIContent(type.Name, type.FullName), GUILayout.Width(position.width - DrawIconInHierarchy.IconSize - m_rightColumnWidth - 20));
-                            if (DrawIconInHierarchy.IsTypeDrawnInHierarchy(type))
+                            if (GUILayoutExtensions.ColoredButton("On", Color.green, GUILayout.Width(m_rightColumnWidth - 10)))
                             {
-                                if (GUILayoutExtensions.ColoredButton("On", Color.green, GUILayout.Width(m_rightColumnWidth - 10)))
-                                {
-                                    DrawIconInHierarchy.RemoveType(type);
-                                }
+                                DrawIconInHierarchy.RemoveType(type);
                             }
-                            else
-                            {
-                                if (GUILayoutExtensions.ColoredButton("Off", Color.red, GUILayout.Width(m_rightColumnWidth - 10)))
-                                {
-                                    DrawIconInHierarchy.AddType(type);
-                                }
-                            }
-                            GUILayout.EndHorizontal();
                         }
+                        else
+                        {
+                            if (GUILayoutExtensions.ColoredButton("Off", Color.red, GUILayout.Width(m_rightColumnWidth - 10)))
+                            {
+                                DrawIconInHierarchy.AddType(type);
+                            }
+                        }
+                        GUILayout.EndHorizontal();
                     }
                 }
             }
