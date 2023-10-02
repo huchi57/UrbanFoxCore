@@ -193,13 +193,13 @@ namespace UrbanFox.Editor
             }
 
             string pathOfComponentScript;
-            if (target is MonoBehaviour)
+            if (target is MonoBehaviour monobehaviour)
             {
-                pathOfComponentScript = AssetDatabase.GetAssetPath(MonoScript.FromMonoBehaviour((MonoBehaviour)target));
+                pathOfComponentScript = AssetDatabase.GetAssetPath(MonoScript.FromMonoBehaviour(monobehaviour));
             }
-            else if (target is ScriptableObject)
+            else if (target is ScriptableObject scriptableObject)
             {
-                pathOfComponentScript = AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject((ScriptableObject)target));
+                pathOfComponentScript = AssetDatabase.GetAssetPath(MonoScript.FromScriptableObject(scriptableObject));
             }
             else
             {
