@@ -15,7 +15,7 @@ namespace UrbanFox
             {
                 if (m_container == null)
                 {
-                    m_container = new GameObject("[Coroutine Container]").AddComponent<Container>();
+                    m_container = new GameObject("[Coroutine Helper Container]").AddComponent<Container>();
                     Object.DontDestroyOnLoad(m_container);
                 }
                 return m_container;
