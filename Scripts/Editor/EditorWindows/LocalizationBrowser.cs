@@ -1,11 +1,20 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.Networking;
+using System.Runtime.Serialization.Json;
+using System.Text;
+
+// TODO: Check if this work
+#if UNITY_2022_1_OR_NEWER
+using Unity.Plastic.Newtonsoft.Json.Linq;
+using Unity.Plastic.Newtonsoft.Json;
+#else
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+#endif
 
 namespace UrbanFox.Editor
 {
