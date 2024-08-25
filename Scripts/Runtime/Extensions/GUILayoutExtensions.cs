@@ -72,5 +72,48 @@ namespace UrbanFox
         {
             HorizontalLine(1, color);
         }
+
+        public static void DrawTexture(Texture texture, float targetWidth, float targetHeight, ScaleMode scaleMode)
+        {
+            var rect = GUILayoutUtility.GetRect(targetWidth, targetHeight);
+            if (texture)
+            {
+                GUI.DrawTexture(rect, texture, scaleMode);
+            }
+        }
+
+        public static void DrawTexture(Texture texture, float targetWidth, ScaleMode scaleMode)
+        {
+            DrawTexture(texture, targetWidth, targetWidth * texture.height / texture.width, scaleMode);
+        }
+
+        public static void DrawTexture(Texture texture, float targetWidth)
+        {
+            DrawTexture(texture, targetWidth, ScaleMode.ScaleToFit);
+        }
+
+        public static void DrawTexture(Sprite sprite, float targetWidth, float targetHeight, ScaleMode scaleMode)
+        {
+            if (sprite)
+            {
+                DrawTexture(sprite.texture, targetWidth, targetHeight, scaleMode);
+            }
+        }
+
+        public static void DrawTexture(Sprite sprite, float targetWidth, ScaleMode scaleMode)
+        {
+            if (sprite)
+            {
+                DrawTexture(sprite.texture, targetWidth, targetWidth * sprite.texture.height / sprite.texture.width, scaleMode);
+            }
+        }
+
+        public static void DrawTexture(Sprite sprite, float targetWidth)
+        {
+            if (sprite)
+            {
+                DrawTexture(sprite.texture, targetWidth, ScaleMode.ScaleToFit);
+            }
+        }
     }
 }
