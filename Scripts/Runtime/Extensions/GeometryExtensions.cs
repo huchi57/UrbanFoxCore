@@ -6,6 +6,129 @@ namespace UrbanFox
 {
     public static class GeometryExtensions
     {
+        /// <summary>
+        /// Clamp a vector between two vectors. Angles are calculated in acute angles (i.e. angles that are no greater than 180 degrees).
+        /// </summary>
+        public static Vector3 ClampBetween(this Vector3 vector, Vector3 rangeA, Vector3 rangeB)
+        {
+            // Cache vector magnitude
+            var targetMagnitude = vector.magnitude;
+
+            // Normalize vectors
+            rangeA = Vector3.ClampMagnitude(rangeA, 1);
+            rangeB = Vector3.ClampMagnitude(rangeB, 1);
+            var normalAB = Vector3.Cross(rangeA, rangeB);
+            vector = Vector3.ClampMagnitude(Vector3.ProjectOnPlane(vector, normalAB), 1);
+
+            // Get angle between range vectors
+            var angleAB = Vector3.Angle(rangeA, rangeB);
+            var angleA = Vector3.Angle(rangeA, vector);
+            var angleB = Vector3.Angle(rangeB, vector);
+
+            // Check if the vector is in the acute angle part of the two range vectors
+            // HACK: Workaround floating points
+            if (Mathf.FloorToInt(angleA) + Mathf.FloorToInt(angleB) <= Mathf.CeilToInt(angleAB))
+            {
+                if (angleA < angleAB && angleB < angleAB)
+                {
+                    return targetMagnitude * vector;
+                }
+            }
+
+            return angleA > angleB ? targetMagnitude * rangeB : targetMagnitude * rangeA;
+        }
+
+        public static bool Is2DPointInTriangle(this Vector2 point, Vector2 triangleVertex0, Vector2 triangleVertex1, Vector2 triangleVertex2)
+        {
+            if (!IsSameSide(triangleVertex0, triangleVertex2, point, triangleVertex1))
+            {
+                return false;
+            }
+            if (!IsSameSide(triangleVertex2, triangleVertex1, point, triangleVertex0))
+            {
+                return false;
+            }
+            if (!IsSameSide(triangleVertex1, triangleVertex0, point, triangleVertex2))
+            {
+                return false;
+            }
+            return true;
+
+            static bool IsSameSide(Vector2 a, Vector2 b, Vector2 c, Vector2 d)
+            {
+                return ((a.y - b.y) * (c.x - a.x) + (b.x - a.x) * (c.y - a.y)) * ((a.y - b.y) * (d.x - a.x) + (b.x - a.x) * (d.y - a.y)) < 0;
+            }
+        }
+
+        public static bool Is2DPointInTriangle(this Vector2 point, params Vector2[] triangleVertices)
+        {
+            if (triangleVertices.IsNullOrEmpty() || triangleVertices.Length != 3)
+            {
+                return false;
+            }
+            return Is2DPointInTriangle(point, triangleVertices[0], triangleVertices[1], triangleVertices[2]);
+        }
+
+        public static bool Is2DPointInTriangle(this Vector2 point, IList<Vector2> triangleVertices)
+        {
+            if (triangleVertices.IsNullOrEmpty() || triangleVertices.Count != 3)
+            {
+                return false;
+            }
+            return Is2DPointInTriangle(point, triangleVertices[0], triangleVertices[1], triangleVertices[2]);
+        }
+
+        public static bool Is2DPointInConvexPolygon(this Vector2 point, params Vector2[] vertices)
+        {
+            if (vertices == null || vertices.Length == 0)
+            {
+                return false;
+            }
+
+            // Special case for 1 point.
+            if (vertices.Length == 1)
+            {
+                return point.IsApproximately(vertices[0]);
+            }
+
+            // Special case for 2 points (a line).
+            if (vertices.Length == 2)
+            {
+                return (Vector2.Distance(point, vertices[0]) + Vector2.Distance(point, vertices[1])).IsApproximately(Vector2.Distance(vertices[0], vertices[1]));
+            }
+
+            // Special case for 3 points (a triangle).
+            if (vertices.Length == 3)
+            {
+                return Is2DPointInTriangle(point, vertices[0], vertices[1], vertices[2]);
+            }
+
+            // General case (shapes with 4 or more vertices can be break down into different triangles).
+            for (int i = 0; i < vertices.Length - 2; i++)
+            {
+                for (int j = i + 1; j < vertices.Length - 1; j++)
+                {
+                    for (int k = j + 1; k < vertices.Length; k++)
+                    {
+                        if (point.Is2DPointInTriangle(vertices[i], vertices[j], vertices[k]))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        public static bool Is2DPointInConvexPolygon(this Vector2 point, IList<Vector2> vertices)
+        {
+            if (vertices.IsNullOrEmpty())
+            {
+                return false;
+            }
+            return Is2DPointInTriangle(point, vertices.ToArray());
+        }
+
         public static bool IsPointInCylinder(this Vector3 point, Vector3 surface1Center, Vector3 surface2Center, float cylinderRadius)
         {
             var pointProjectedOnCylinderAxis = surface1Center + Vector3.Project(point - surface1Center, surface2Center - surface1Center);

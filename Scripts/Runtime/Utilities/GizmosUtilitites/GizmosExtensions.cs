@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace UrbanFox
@@ -19,6 +20,20 @@ namespace UrbanFox
                 using (new GizmosScope(color))
                 {
                     for (int i = 0; i < points.Length - 1; i++)
+                    {
+                        Gizmos.DrawLine(points[i], points[i + 1]);
+                    }
+                }
+            }
+        }
+
+        public static void DrawLines(Color color, IList<Vector3> points)
+        {
+            if (points != null && points.Count > 0)
+            {
+                using (new GizmosScope(color))
+                {
+                    for (int i = 0; i < points.Count - 1; i++)
                     {
                         Gizmos.DrawLine(points[i], points[i + 1]);
                     }
