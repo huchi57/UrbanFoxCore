@@ -15,14 +15,20 @@ namespace UrbanFox.Editor
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
+            var valueSource = property.FindPropertyRelative(k_valueSource);
+            if (valueSource.enumValueIndex == (int)ValueSource.ScriptableObject && !property.FindPropertyRelative(k_parameterAsset).objectReferenceValue)
+            {
+                return 2 * EditorGUIUtility.singleLineHeight;
+            }
             return EditorGUIUtility.singleLineHeight;
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            position = new Rect(position) { height = EditorGUIUtility.singleLineHeight };
             var labelRect = new Rect(position) { width = position.width / 3 };
             var toggleRect = new Rect(position) { width = position.width / 3, x = labelRect.x + labelRect.width };
-            var valueRect = new Rect(position) { width = position.width / 3 - 5, x = toggleRect.x + toggleRect.width + 5};
+            var valueRect = new Rect(position) { width = position.width / 3 - 5, x = toggleRect.x + toggleRect.width + 5 };
 
             var valueSource = property.FindPropertyRelative(k_valueSource);
             var button1Rect = new Rect(toggleRect) { width = toggleRect.width / 2 };
@@ -58,6 +64,14 @@ namespace UrbanFox.Editor
                 }
                 EditorGUI.PropertyField(valueRect, parameterAsset, GUIContent.none);
                 GUI.backgroundColor = cacheColor;
+                if (parameterAsset.objectReferenceValue == null)
+                {
+                    valueRect = new Rect(valueRect)
+                    {
+                        y = valueRect.y + EditorGUIUtility.singleLineHeight
+                    };
+                    EditorGUI.HelpBox(valueRect, "No reference. Using default value.", MessageType.Warning);
+                }
             }
         }
     }

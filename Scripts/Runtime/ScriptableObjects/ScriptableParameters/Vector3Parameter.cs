@@ -15,6 +15,12 @@ namespace UrbanFox
         [SerializeField]
         private ScriptableVector3Parameter m_parameterAsset;
 
-        public Vector3 Value => m_valueSource == ValueSource.Direct ? m_value : m_parameterAsset.Value;
+        public Vector3 Value => m_valueSource == ValueSource.Direct ? m_value : m_parameterAsset ? m_parameterAsset.Value : default;
+
+        public Vector3Parameter(Vector3 defaultValue)
+        {
+            m_valueSource = ValueSource.Direct;
+            m_value = defaultValue;
+        }
     }
 }

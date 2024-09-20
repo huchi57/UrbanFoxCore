@@ -15,6 +15,12 @@ namespace UrbanFox
         [SerializeField]
         private ScriptableColorParameter m_parameterAsset;
 
-        public Color Value => m_valueSource == ValueSource.Direct ? m_value : m_parameterAsset.Value;
+        public Color Value => m_valueSource == ValueSource.Direct ? m_value : m_parameterAsset ? m_parameterAsset.Value : default;
+
+        public ColorParameter(Color defaultValue)
+        {
+            m_valueSource = ValueSource.Direct;
+            m_value = defaultValue;
+        }
     }
 }

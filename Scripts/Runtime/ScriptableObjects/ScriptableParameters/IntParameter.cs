@@ -15,6 +15,12 @@ namespace UrbanFox
         [SerializeField]
         private ScriptableIntParameter m_parameterAsset;
 
-        public int Value => m_valueSource == ValueSource.Direct ? m_value : m_parameterAsset.Value;
+        public int Value => m_valueSource == ValueSource.Direct ? m_value : m_parameterAsset ? m_parameterAsset.Value : default;
+
+        public IntParameter(int defaultValue)
+        {
+            m_valueSource = ValueSource.Direct;
+            m_value = defaultValue;
+        }
     }
 }

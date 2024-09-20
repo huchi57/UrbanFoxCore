@@ -15,6 +15,12 @@ namespace UrbanFox
         [SerializeField]
         private ScriptableFloatParameter m_parameterAsset;
 
-        public float Value => m_valueSource == ValueSource.Direct ? m_value : m_parameterAsset.Value;
+        public float Value => m_valueSource == ValueSource.Direct ? m_value : m_parameterAsset ? m_parameterAsset.Value : default;
+
+        public FloatParameter(float defaultValue)
+        {
+            m_valueSource = ValueSource.Direct;
+            m_value = defaultValue;
+        }
     }
 }
