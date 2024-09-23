@@ -86,7 +86,7 @@ namespace UrbanFox
 
         public static IEnumerator LoadScene_Coroutine(string scene, Action onComplete = null, Action<float> onProgress = null)
         {
-            if (!scene.IsNullOrEmpty() && !IsSceneLoaded(scene) && !m_scenesInOperation.Contains(scene))
+            if ((!scene.IsNullOrEmpty() && !IsSceneLoaded(scene)) || !m_scenesInOperation.Contains(scene))
             {
                 m_scenesInOperation.Add(scene);
                 var operation = SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
@@ -109,7 +109,7 @@ namespace UrbanFox
                 var operations = new List<AsyncOperation>();
                 foreach (var scene in scenes)
                 {
-                    if (!IsSceneLoaded(scene) && !m_scenesInOperation.Contains(scene))
+                    if (!IsSceneLoaded(scene) || !m_scenesInOperation.Contains(scene))
                     {
                         m_scenesInOperation.Add(scene);
                         operations.Add(SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive));
