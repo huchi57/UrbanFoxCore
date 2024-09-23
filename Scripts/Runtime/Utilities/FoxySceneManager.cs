@@ -86,18 +86,24 @@ namespace UrbanFox
 
         public static IEnumerator LoadScene_Coroutine(string scene, Action onComplete = null, Action<float> onProgress = null)
         {
-            if ((!scene.IsNullOrEmpty() && !IsSceneLoaded(scene)) || !m_scenesInOperation.Contains(scene))
+            if (!scene.IsNullOrEmpty())
             {
-                m_scenesInOperation.Add(scene);
-                var operation = SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
-                yield return null;
-                while (!operation.isDone)
+                if (!IsSceneLoaded(scene) && !m_scenesInOperation.Contains(scene))
                 {
-                    onProgress?.Invoke(operation.progress / 0.9f);
+                    m_scenesInOperation.Add(scene);
+                    var operation = SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
                     yield return null;
+                    while (!operation.isDone)
+                    {
+                        onProgress?.Invoke(operation.progress / 0.9f);
+                        yield return null;
+                    }
+                    if (m_scenesInOperation.Contains(scene))
+                    {
+                        m_scenesInOperation.Remove(scene);
+                    }
                 }
             }
-            m_scenesInOperation.Remove(scene);
             onProgress?.Invoke(1);
             onComplete?.Invoke();
         }
@@ -109,7 +115,7 @@ namespace UrbanFox
                 var operations = new List<AsyncOperation>();
                 foreach (var scene in scenes)
                 {
-                    if (!IsSceneLoaded(scene) || !m_scenesInOperation.Contains(scene))
+                    if (!IsSceneLoaded(scene) && !m_scenesInOperation.Contains(scene))
                     {
                         m_scenesInOperation.Add(scene);
                         operations.Add(SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive));
