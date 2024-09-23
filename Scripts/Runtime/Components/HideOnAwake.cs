@@ -13,7 +13,8 @@ namespace UrbanFox
             SetGameObjectInactive,
             HideGraphic,
             HideMeshRenderer,
-            DestroyGameObject
+            DestroyGameObject,
+            MakeMeshToCastShadowOnly
         }
 
         [SerializeField]
@@ -54,6 +55,12 @@ namespace UrbanFox
                     break;
                 case OnAwakeAction.DestroyGameObject:
                     Destroy(gameObject);
+                    break;
+                case OnAwakeAction.MakeMeshToCastShadowOnly:
+                    if (m_meshRenderer || TryGetComponent(out m_meshRenderer))
+                    {
+                        m_meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+                    }
                     break;
                 default:
                     break;
