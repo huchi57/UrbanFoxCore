@@ -98,6 +98,7 @@ namespace UrbanFox
                         onProgress?.Invoke(operation.progress / 0.9f);
                         yield return null;
                     }
+                    yield return null;
                     if (m_scenesInOperation.Contains(scene))
                     {
                         m_scenesInOperation.Remove(scene);
