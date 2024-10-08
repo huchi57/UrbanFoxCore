@@ -18,6 +18,7 @@ namespace UrbanFox
         public static int NumberOfLanguages => _fullLocalizationData.IsNullOrEmpty() ? 0 : _fullLocalizationData.Count();
         public static List<string> Keys { get; private set; }
         public static int CurrentLanguageIndex { get; private set; }
+        public static string CurrentLanguageName { get; private set; }
         public static string LanguageKeyName { get; private set; }
         public static bool IsInitialized { get; private set; }
 
@@ -117,6 +118,10 @@ namespace UrbanFox
             if (languageIndex.IsInRange(_fullLocalizationData))
             {
                 CurrentLanguageIndex = languageIndex;
+                if (CurrentLanguageIndex.IsInRange(_fullLocalizationData) && _fullLocalizationData[CurrentLanguageIndex].ContainsKey(LanguageKeyName))
+                {
+                    CurrentLanguageName = _fullLocalizationData[CurrentLanguageIndex][LanguageKeyName];
+                }
                 _onLanguageChanged?.Invoke();
             }
         }
