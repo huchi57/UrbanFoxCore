@@ -31,6 +31,7 @@ namespace UrbanFox.Editor
 
         [SerializeField] private string _sourceSpreadsheetID = string.Empty;
         [SerializeField] private string _searchKey = string.Empty;
+        [SerializeField] private bool _enumerateXMLFiles;
 
         private UnityWebRequest _webRequest = null;
         private string _downloadedJSONText = string.Empty;
@@ -70,6 +71,7 @@ namespace UrbanFox.Editor
         private void OnEnable()
         {
             _sourceSpreadsheetID = EditorPrefs.GetString(_sourceSpreadsheetIDKey + Application.productName, string.Empty);
+            _enumerateXMLFiles = EditorPrefs.GetBool(_sourceSpreadsheetIDKey + nameof(_enumerateXMLFiles), _enumerateXMLFiles);
         }
 
         private void OnDisable()
@@ -88,6 +90,7 @@ namespace UrbanFox.Editor
             EditorGUILayout.Space();
 
             GUILayout.Label("Data Operations (Requires Internet)", EditorStyles.boldLabel);
+            _enumerateXMLFiles = EditorGUILayout.Toggle("Enumerate XML Files", _enumerateXMLFiles);
             using (var _ = new GUILayout.HorizontalScope())
             {
                 if (GUILayout.Button("Download", GUILayout.Height(40)))
@@ -360,7 +363,14 @@ namespace UrbanFox.Editor
                     content.Add($"    <i k=\"{keys[j].ToXMLAttribute()}\" v=\"{languageData[j].ToXMLAttribute()}\"/>");
                 }
                 content.Add("</data>");
-                File.WriteAllLines(Path.Combine(_assetCreationFolder, $"{i}_{languageName}.xml"), content);
+                if (_enumerateXMLFiles)
+                {
+                    File.WriteAllLines(Path.Combine(_assetCreationFolder, $"{i}_{languageName}.xml"), content);
+                }
+                else
+                {
+                    File.WriteAllLines(Path.Combine(_assetCreationFolder, $"{languageName}.xml"), content);
+                }
             }
             FoxyLogger.Log($"Successfully created {languageAndKeyData.Count - 1} language files.");
             AssetDatabase.Refresh();
